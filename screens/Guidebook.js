@@ -8,22 +8,23 @@ export const Guidebook = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <View>
+            <Text style = {styles.headerText}>Guidebook</Text>
+            <Text style = {styles.headerLink}>
+                <Text>Information from the </Text>
+                <Text style = {{color: '#fab73d'}}
+                    onPress = {() => Linking.openURL('https://www.inhf.org/blog/blog/5-of-iowas-most-invasive-species-and-how-to-get-rid-of-them/')}>
+                    Iowa Natural Heritage Foundation
+                </Text>
+            </Text>
+            <View style = {{paddingBottom:50}}>
                 <FlatList
                 data = {PLANTS}
                 renderItem = {renderItem}
                 keyExtractor = {item => item.id}
                 />
             </View>
-            <Text>
-                Information sourced from the
-                <Text style = {{color: 'blue'}}
-                    onPress = {() => Linking.openURL('https://www.inhf.org/blog/blog/5-of-iowas-most-invasive-species-and-how-to-get-rid-of-them/')}>
-                    Iowa Natural Heritage Foundation
-                </Text>
-            </Text>
+            
         </SafeAreaView>
-        
     );
 };
 
@@ -81,15 +82,25 @@ const styles = StyleSheet.create({
         height: 100 + '%'
     },
     item: {
-        backgroundColor: '#f9c2ff',
+        backgroundColor: '#fddca5',
         padding: 10,
         marginVertical: 8,
         marginHorizontal: 16,
-        flexDirection: 'row'
+        flexDirection: 'row',
+        borderRadius: 10
     },
     plantInfo: {
         flexDirection: 'column',
-        flexShrink: 1
+        flexShrink: 1,
+        paddingLeft: 10
+    },
+    headerText: {
+        fontSize: 24,
+        textAlign: 'center'
+    },
+    headerLink: {
+        fontSize: 14,
+        textAlign: 'center'
     },
     title: {
         fontSize: 24,
