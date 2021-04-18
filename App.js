@@ -18,14 +18,6 @@ function IdentifyScreen() {
   )
 }
 
-function MapScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Map!</Text>
-    </View>
-  );
-}
-
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -40,8 +32,6 @@ export default function App() {
             iconName = focused ? 'book-sharp' : 'book-outline';
           } else if (route.name === 'Identify') {
             iconName = focused ? 'search-sharp' : 'search-outline';
-          } else if (route.name === 'Map') {
-            iconName = focused ? 'map-sharp' : 'map-outline';
           }
 
           // You can return any component that you like here!
@@ -55,7 +45,6 @@ export default function App() {
       >
         <Tab.Screen name="Guide" component={GuidebookScreen} />
         <Tab.Screen name="Identify" component={IdentifyScreen} />
-        <Tab.Screen name="Map" component={MapScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
