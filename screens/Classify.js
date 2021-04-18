@@ -1,10 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
+    SafeAreaView,
     StyleSheet,
     Text,
     View,
-    ActivityIndicator,
-    StatusBar,
     Image,
     TouchableOpacity
   } from 'react-native'
@@ -14,7 +13,7 @@ import {
   import Constants from 'expo-constants'
   import * as Permissions from 'expo-permissions'
 
-export const Classify = ({navigation, route}) => {
+export const Classify = () => {
     return (
         <ML></ML>
     )
@@ -24,7 +23,7 @@ class ML extends React.Component {
   state = {
     isTfReady: false,
     isModelReady: false,
-    predictions: null,
+    prediction: null,
     image: null
   }
 
@@ -65,54 +64,20 @@ class ML extends React.Component {
     return expanded;
   }
 
-  convertProbsToClasses(probs) {
-    const classNames = ['apple', 'banana', 'beetroot', 'bell pepper', 'cabbage', 'capsicum', 'carrot', 'cauliflower', 'chilli pepper', 'corn', 'cucumber', 'eggplant', 'garlic', 'ginger', 'grapes', 'jalepeno', 'kiwi', 'lemon', 'lettuce', 'mango', 'onion', 'orange', 'paprika', 'pear', 'peas', 'pineapple', 'pomegranate', 'potato', 'raddish', 'soy beans', 'spinach', 'sweetcorn', 'sweetpotato', 'tomato', 'turnip', 'watermelon'];
-    let res = []
-    let prob1 = -1;
-    let prob2 = -1;
-    let prob3 = -1;
-    let max1 = 0;
-    let max2 = 0;
-    let max3 = 0;
+  convertProbToClass(probs) {
+    const classNames = ['Bush Honeysuckle', 'European Buckthorn', 'Garlic Mustard', 'Multiflora Rose', 'Non-invasive', 'Reed Canary Grass']
+    let maxProb = probs[0];
+    let maxInd = 0
 
     for(let i = 0; i < classNames.length; i++) {
-      if (probs[i] > prob1) {
-        prob1 = probs[i];
-        max1 = i;
-      }
+        if (probs[i] > maxProb) {
+            maxProb = probs[i];
+            maxInd = i;
+        }
     }
 
-    for(let i = 0; i < classNames.length; i++) {
-      if (probs[i] > prob2 && i != max1) {
-        prob2 = probs[i];
-        max2 = i;
-      }
+    return classNames[maxInd];
     }
-
-    for(let i = 0; i < classNames.length; i++) {
-      if (probs[i] > prob3 && i != max1 && i != max2) {
-        prob3 = probs[i];
-        max3 = i;
-      }
-    }
-
-    res.push({
-      className: classNames[max1],
-      probability: probs[max1]
-    });
-
-    res.push({
-      className: classNames[max2],
-      probability: probs[max2]
-    });
-
-    res.push({
-      className: classNames[max3],
-      probability: probs[max3]
-    });
-
-    return res;
-  }
 
   classifyImage = async () => {
     try {
@@ -124,9 +89,9 @@ class ML extends React.Component {
       probs.print();
       probs.softmax().print();
       const probTensor = await probs.softmax().data();
-      const predictions = this.convertProbsToClasses(probTensor);
-      console.log(predictions);
-      this.setState({ predictions })
+      const predictedClass = this.convertProbToClass(probTensor);
+      console.log(predictedClass);
+      this.setState({ prediction: predictedClass});
     } catch (error) {
       console.log(error)
     }
@@ -160,25 +125,12 @@ class ML extends React.Component {
   }
 
   render() {
-    const { isTfReady, isModelReady, predictions, image } = this.state
+    const { isModelReady, image } = this.state
 
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle='light-content' />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.text}>
-            TFJS ready? {isTfReady ? <Text>✅</Text> : ''}
-          </Text>
-
-          <View style={styles.loadingModelContainer}>
-            <Text style={styles.text}>Model ready? </Text>
-            {isModelReady ? (
-              <Text style={styles.text}>✅</Text>
-            ) : (
-              <ActivityIndicator size='small' />
-            )}
-          </View>
-        </View>
+      <SafeAreaView style={styles.container}>
+        <Text style = {styles.headerText}>Identifier</Text>
+        <Text style = {{textAlign:'center'}}>Can't figure out what a plant might be from the guidebook? Try identifying it with our recognition tool.</Text>
         <TouchableOpacity
           style={styles.imageWrapper}
           onPress={isModelReady ? this.selectImage : undefined}>
@@ -188,20 +140,29 @@ class ML extends React.Component {
             <Text style={styles.transparentText}>Tap to choose image</Text>
           )}
         </TouchableOpacity>
-        <View style={styles.predictionWrapper}>
-          {isModelReady && image && (
-            <Text style={styles.text}>
-              Predictions: {predictions ? '' : 'Predicting...'}
+        <View style = {styles.predictionInfoContainer}>
+          <View style = {{flex: 0.25}}>
+            <Text style = {styles.text}>
+                We think this is:
             </Text>
-          )}
-          {isModelReady &&
-            predictions &&
-            predictions.map(p => this.renderPrediction(p))}
+            <Text style = {styles.predictionText}>
+                {this.state.prediction}
+            </Text>
+          </View>
+          <View style = {{flex: 1}}>
+            <Text style = {[styles.text, {fontWeight: 'bold'}]}>
+                What should I do if I find an invasive plant?
+            </Text>
+            
+            <Text style = {styles.text}>
+                If you believe this is a new problem, take notes or pictures of the plant and nearby landmarks. Report this to your local DNR office.
+            </Text>
+            <Text style = {styles.text}>
+                If you wish to collect a sample or remove a plant, take caution not to spread it or its seeds elsewhere. Make sure to carry it in a secure bag.
+            </Text>
+          </View>
         </View>
-        <View style={styles.footer}>
-          <Text style={styles.poweredBy}>Powered by:</Text>
-        </View>
-      </View>
+      </SafeAreaView>
     )
   }
 }
@@ -209,7 +170,7 @@ class ML extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#171f24',
+    backgroundColor: '#fff',
     alignItems: 'center'
   },
   loadingContainer: {
@@ -217,8 +178,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   text: {
-    color: '#ffffff',
-    fontSize: 16
+    color: '#000',
+    fontSize: 16,
+    textAlign: 'center'
+  },
+  predictionText: {
+    color: '#000',
+    fontSize: 30,
+    textAlign: 'center'
   },
   loadingModelContainer: {
     flexDirection: 'row',
@@ -228,9 +195,10 @@ const styles = StyleSheet.create({
     width: 280,
     height: 280,
     padding: 10,
-    borderColor: '#cf667f',
-    borderWidth: 5,
-    borderStyle: 'dashed',
+    borderColor: '#546747',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderRadius: 10,
     marginTop: 40,
     marginBottom: 10,
     position: 'relative',
@@ -238,34 +206,22 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   imageContainer: {
-    width: 250,
-    height: 250,
+    width: 280,
+    height: 280,
     position: 'absolute',
-    top: 10,
-    left: 10,
-    bottom: 10,
-    right: 10
+    borderRadius:10
   },
-  predictionWrapper: {
-    height: 100,
-    width: '100%',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
+  headerText: {
+    fontSize: 24,
+    textAlign: 'center'
+},
   transparentText: {
-    color: '#ffffff',
-    opacity: 0.7
+    color: '#000',
+    opacity: 0.7,
+    textAlign: 'center'
   },
-  footer: {
-    marginTop: 40
-  },
-  poweredBy: {
-    fontSize: 20,
-    color: '#e69e34',
-    marginBottom: 6
-  },
-  tfLogo: {
-    width: 125,
-    height: 70
+  predictionInfoContainer: {
+      flexDirection: 'column',
+      justifyContent: 'center'
   }
 })

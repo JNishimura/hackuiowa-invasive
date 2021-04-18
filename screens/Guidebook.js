@@ -100,7 +100,8 @@ const styles = StyleSheet.create({
     },
     headerLink: {
         fontSize: 14,
-        textAlign: 'center'
+        textAlign: 'center',
+        paddingBottom: 10
     },
     title: {
         fontSize: 24,
